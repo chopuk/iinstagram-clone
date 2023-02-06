@@ -1,11 +1,11 @@
 import { View, StyleSheet } from 'react-native'
 import React from 'react'
-import AddNewPost from '../components/newPost/AddNewPost'
+import NewPost from '../components/newPost/NewPost'
 
 const NewPostScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-      <AddNewPost navigation={navigation}/>
+      <NewPost navigation={navigation}/>
     </View>
   )
 }

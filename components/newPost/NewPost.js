@@ -1,13 +1,13 @@
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native'
 import React from 'react'
 import Icon from 'react-native-vector-icons/Feather'
-import FormikPostUploader from './FormikPostUploader'
+import NewPostForm from './NewPostForm'
 
-const AddNewPost = ({navigation}) => {
+const NewPost = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Header navigation={navigation}/>
-      <FormikPostUploader navigation={navigation}/>
+      <NewPostForm navigation={navigation}/>
     </View>
   )
 }
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default AddNewPost
+export default NewPost

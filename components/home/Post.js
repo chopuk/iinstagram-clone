@@ -4,8 +4,7 @@ import { Divider } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
 import { db, firebase } from '../../firebase'
 import { POSTS } from '../../data/posts'
-
-const urlPrefix = 'http://192.168.0.220:4000/newposts/'
+import { urlPrefix } from '../../environment'
 
 const Post = ({post}) => {
 
@@ -73,7 +72,7 @@ const PostHeader = ({post}) => (
 const PostImage = ({post}) => (
   <View style={{ width: '100%', height: 450 }}>
     <Image 
-      source={{ uri: urlPrefix + post.imageId + '.jpg'}}
+      source={{ uri: urlPrefix + 'uploads/' + post.imageName}}
       style={{height:'100%', resizeMode:'cover'}}
     />
   </View>

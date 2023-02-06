@@ -19,7 +19,7 @@ const Header = ({navigation}) => {
         <TouchableOpacity onPress={handleSignout}>
             <Image
                 style={styles.logo}
-                source={require('../../assets/images/instagram-logo.jpg')}
+                source={require('../../assets/images/instagramtitle.jpg')}
             />
         </TouchableOpacity>
         <View style={styles.iconContainer}>
@@ -31,7 +31,6 @@ const Header = ({navigation}) => {
             <TouchableOpacity>
                 <Icon name="heart" size={25} 
                     style={{marginLeft:20, color: 'white'}} 
-                    onPress={()=>console.log("heart icon")}
                 />
             </TouchableOpacity>
             <TouchableOpacity>
@@ -40,7 +39,6 @@ const Header = ({navigation}) => {
                 </View>
                 <Icon name="send" size={25} 
                     style={{marginLeft:20, color: 'white'}} 
-                    onPress={()=>console.log("bubble icon")}
                 />
             </TouchableOpacity>
         </View>

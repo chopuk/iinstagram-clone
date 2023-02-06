@@ -8,7 +8,7 @@ const SignupScreen = ({navigation}) => {
         <View style={styles.logoContainer}>
             <Image
                 style={styles.logo}
-                source={require('../assets/images/instagram-logo.png')}
+                source={require('../assets/images/instagramlogo.png')}
             />
         </View>
         <SignupForm navigation={navigation}/>
