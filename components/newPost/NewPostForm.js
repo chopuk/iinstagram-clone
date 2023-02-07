@@ -5,8 +5,7 @@ import * as Yup from 'yup'
 import { Button } from 'react-native-elements'
 import { db, firebase, storage} from '../../firebase'
 import * as ImagePicker from 'expo-image-picker'
-import httpRequest from '../../axios'
-import { urlPrefix } from '../../environment'
+import ENVIRONMENT from '../../environment'
 
 const uploadPostSchema = Yup.object({
     caption: Yup.string()
@@ -57,6 +56,8 @@ const NewPostForm = ({navigation}) => {
 
   const uploadImage = async(filename, base64Image) => {
     setUploading(true)
+
+    //fetch 'post' request for formData file ( uses multer at node server side )
     const formData = new FormData()
     formData.append('username', 'chopuk')
     formData.append('instaImage', {
@@ -69,42 +70,43 @@ const NewPostForm = ({navigation}) => {
         'Accept': 'application/json',
         'Content-Type': 'multipart/form-data'
     }
-
-    // axios post request for formData file ( uses multer at server end )
-    // try {  
-    //     const response = await httpRequest({
-    //         method: 'POST',
-    //         url: 'uploadimage',
-    //         data: formData,
-    //         headers: headers,
-    //     })
-    //     console.log(response.data)
-    // } catch (error) {
-    //     console.log(error)
-    // }
-
-    // fetch post request for base64 encoded file ( uses normal body parsing at server end )
     try {  
         const response = await fetch(
-            urlPrefix + 'uploadbase64',
+            ENVIRONMENT.URL_PREFIX + 'uploadimage',
             {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                // send our base64 string as POST request
-                body: JSON.stringify({
-                    imgsource: base64Image,
-                    filename: filename
-                })
+                headers: headers,
+                body: formData
             }
         )
         const data = await response.json()
-        console.log(data.filename)
+        console.log(data)
     } catch (error) {
         console.log(error)
     }
+
+    // fetch 'post' request for base64 encoded image ( uses normal body parsing at node server side )
+    // try {  
+    //     const response = await fetch(
+    //         ENVIRONMENT.URL_PREFIX + 'uploadbase64',
+    //         {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             // send our base64 string as POST request
+    //             body: JSON.stringify({
+    //                 imgsource: base64Image,
+    //                 filename: filename
+    //             })
+    //         }
+    //     )
+    //     const data = await response.json()
+    //     console.log(data.filename)
+    // } catch (error) {
+    //     console.log(error)
+    // }
 
     setUploading(false)
     setImage(null)
@@ -123,7 +125,7 @@ const NewPostForm = ({navigation}) => {
     }
     // TODO.....
     //ref.getDownloadUrl()
-    //console.log('URL=' + fred)
+
     setUploading(false)
     setImage(null)
   }

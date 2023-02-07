@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { SignedInStack, SignedOutStack } from './Navigation'
-
 import { firebase } from './firebase'
 
 const AuthNavigation = () => {

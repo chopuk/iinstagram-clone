@@ -1,12 +1,14 @@
 import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native'
 import React from 'react'
 import { firebase } from '../../firebase'
+import * as SecureStore from 'expo-secure-store'
 
 import Icon from 'react-native-vector-icons/Feather'
 
 const handleSignout = async() => {
     try {
         await firebase.auth().signOut()
+        await SecureStore.deleteItemAsync('credentials')
         console.log('Signed out successfully')
     } catch (error) {
         console.log(error)

@@ -45,6 +45,4 @@ const styles = StyleSheet.create({
     }
 })
 
-{/* <Text style={{color: 'white'}} key={index}>{story.user}</Text> */}
-
 export default Stories

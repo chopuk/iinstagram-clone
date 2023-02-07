@@ -1,8 +1,9 @@
 import { View, TextInput, StyleSheet, Text, Pressable, TouchableOpacity, Alert } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import Validator from 'email-validator'
+import * as SecureStore from 'expo-secure-store'
 
 import { firebase } from '../../firebase'
 
@@ -17,22 +18,45 @@ const loginFormSchema = Yup.object({
             .min(6, 'Password must be at least 6 characters')
 })
 
-const onLogin = async(email,password) => {
+const tryLogin = async(email,password,saveCredentials) => {
     try {
         await firebase.auth().signInWithEmailAndPassword(email,password)
+        // see if we need to save the credentials to storage for next time
+        if(saveCredentials) {
+            const credentials = {
+                email: email,
+                password: password
+            }
+            try {
+                await SecureStore.setItemAsync('credentials', JSON.stringify(credentials))
+            } catch (error) {
+                console.log(error)
+            }
+        }
     } catch (error) {
         Alert.alert('Invalid Entry',error.message)
     }
 }
 
 const LoginForm = ({navigation}) => {
+
+  const [saveCredentials, setSaveCredentials] = useState(false)
+
+  const toggleStorage = () => {
+    if (saveCredentials) {
+        setSaveCredentials(false)
+    } else {
+        setSaveCredentials(true)
+    }
+}
+
   return (
     <View style={styles.wrapper}>
         <Formik
             initialValues={{email: '', password: ''}} 
             validationSchema={loginFormSchema}
             onSubmit={(values) => {
-                onLogin(values.email, values.password)
+                tryLogin(values.email, values.password, saveCredentials)
             }}
             validateOnMount={true}
         >
@@ -86,9 +110,15 @@ const LoginForm = ({navigation}) => {
                         {errors.email}
                     </Text>
                 )}
-                <View style={{alignItems: 'flex-end', marginRight:10}}>
-                    <Text style={{color: '#6bb0f5'}}>Forgot password?</Text>
+                <View style={{flexDirection: 'row', justifyContent:'space-between',marginHorizontal:10}}>
+                    <Pressable style={{alignItems: 'flex-start'}} onPress={toggleStorage}>
+                        <Text style={[{ color: saveCredentials ? 'blue' : '#6bb0f5'}, { fontWeight: saveCredentials ? 'bold' : 'normal'}]}>Keep Me Logged In</Text>
+                    </Pressable>
+                    <View style={{alignItems: 'flex-end'}}>
+                        <Text style={{color: '#6bb0f5'}}>Forgot password?</Text>
+                    </View>
                 </View>
+             
                 <View style={{marginHorizontal:10,marginTop:20}}>
                     <Pressable style={styles.button(isValid)} onPress={handleSubmit}>
                         <Text style={styles.buttonText}>Log In</Text>
