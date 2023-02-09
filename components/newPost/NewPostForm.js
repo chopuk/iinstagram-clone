@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, TextInput, Text,ScrollView } from 'react-native'
+import { View, Image, StyleSheet, TextInput, Text } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import {Formik} from 'formik'
 import * as Yup from 'yup'
@@ -17,12 +17,32 @@ const NewPostForm = ({navigation}) => {
 
   const [currentLoggedInuser, setCurrentLoggedInUser] = useState(null)
 
-  const [image, setImage] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [base64Image, setBase64Image] = useState('')
   const [imageName, setImageName] = useState('')
-  const [uri, setUri] = useState('')
+  const [uri, setUri] = useState(null)
 
+  useEffect(() => {
+    getUsername()
+  },[])
+
+  const getUsername = () => {
+    const user = firebase.auth().currentUser
+    const lookupUser = db
+        .collection('users')
+        .where('owner_uid', '==', user.uid).limit(1)
+        .onSnapshot(
+            snapshot => snapshot.docs.map(doc =>{
+                setCurrentLoggedInUser({
+                    username: doc.data().username,
+                    profile_picture: doc.data().profile_picture,
+                    email: doc.data().email
+                })
+            })
+        )
+    return lookupUser
+  }
+ 
   const pickImage = async (source) => {
 
     let result
@@ -45,12 +65,9 @@ const NewPostForm = ({navigation}) => {
     }
     if (!result.canceled) {
         const uri = result.assets[0].uri
-        const imageSource = { uri: result.assets[0].uri}
-        setImage(imageSource)
-        setUri(result.assets[0].uri)
         setBase64Image(result.assets[0].base64)
-        const filename = currentLoggedInuser.username + '-' + uri.substring(uri.lastIndexOf('/')+1)
-        setImageName(filename)
+        setUri(uri)
+        setImageName(currentLoggedInuser.username + '-' + uri.substring(uri.lastIndexOf('/')+1))
     }
   }
 
@@ -109,68 +126,46 @@ const NewPostForm = ({navigation}) => {
     // }
 
     setUploading(false)
-    setImage(null)
+    setUri(null)
   }
 
-  const uploadImageToFirebase = async (filename) => {
+  const uploadImageAndPostToFirebase = async (filename,caption) => {
+
     setUploading(true)
-    const response = await fetch(image.uri)
+
+    const response = await fetch(uri)
     const blob = await response.blob()
-    var ref = firebase.storage().ref().child(filename).put(blob)
 
     try {
-        await ref
+        await firebase.storage().ref().child('instagram/' + filename).put(blob)
     } catch (error) {
         console.log(error)
     }
-    // TODO.....
-    //ref.getDownloadUrl()
 
-    setUploading(false)
-    setImage(null)
-  }
+    const downloadURL = await firebase.storage().ref().child('instagram/' + filename).getDownloadURL()
 
-  const getUsername = () => {
-    const user = firebase.auth().currentUser
-    const lookupUser = db
-        .collection('users')
-        .where('owner_uid', '==', user.uid).limit(1)
-        .onSnapshot(
-            snapshot => snapshot.docs.map(doc =>{
-                setCurrentLoggedInUser({
-                    username: doc.data().username,
-                    profile_picture: doc.data().profile_picture,
-                    email: doc.data().email
-                })
+    try {
+        await db
+            .collection('users')
+            .doc(firebase.auth().currentUser.email)
+            .collection('posts')
+            .add({
+                username: currentLoggedInuser.username,
+                email: currentLoggedInuser.email,
+                profile_picture: currentLoggedInuser.profile_picture,
+                owner_uid: firebase.auth().currentUser.uid,
+                caption: caption,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                imageName: filename,
+                imageURL: downloadURL,
+                likes_by_users: [],
+                comments: []
             })
-        )
-    return lookupUser
-  }
-
-  useEffect(() => {
-    getUsername()
-  },[])
-
-  const uploadPostToFirebase = (filename,caption) => {
-    const addPost = db
-        .collection('users')
-        .doc(firebase.auth().currentUser.email)
-        .collection('posts')
-        .add({
-            username: currentLoggedInuser.username,
-            email: currentLoggedInuser.email,
-            profile_picture: currentLoggedInuser.profile_picture,
-            owner_uid: firebase.auth().currentUser.uid,
-            caption: caption,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            imageName: filename,
-            likes_by_users: [],
-            comments: []
-        })
-        .then(() => navigation.goBack())
-
-    return addPost
-  }
+        navigation.goBack()
+    } catch (error) {
+        console.log(error)
+    }
+}
 
   return (
     <>
@@ -178,9 +173,8 @@ const NewPostForm = ({navigation}) => {
             initialValues={{caption: ''}} 
             validationSchema={uploadPostSchema}
             onSubmit={values => {
-                uploadImage(imageName, base64Image)
-                //uploadImageToFirebase(imageName)
-                uploadPostToFirebase(imageName,values.caption)
+                //uploadImage(imageName, base64Image) // use my image-server for storing image
+                uploadImageAndPostToFirebase(imageName,values.caption) // use Firebase for image and post
             }}
             validateOnMount={true}
         >
@@ -195,10 +189,10 @@ const NewPostForm = ({navigation}) => {
             }) => {
             return <>
                 <View style={{alignItems: 'center', marginTop:10}}>
-                    { image ? 
+                    { uri ? 
                         <Image
                             style={styles.placeholder}
-                            source={{uri: image.uri}}
+                            source={{uri: uri}}
                         /> : 
                         <Image
                             style={styles.placeholder}

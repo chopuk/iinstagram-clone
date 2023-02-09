@@ -3,6 +3,7 @@ import AuthNavigation from './AuthNavigation'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect } from 'react'
 import { firebase } from './firebase'
+import { StatusBar } from 'react-native'
 
 // keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync()
@@ -11,16 +12,18 @@ export default function App() {
 
   // display the splash screen for 1 second...
   setTimeout(async () => {
-    await SplashScreen.hideAsync();
-  }, 2000)
+    await SplashScreen.hideAsync()
+  }, 3000)
 
   useEffect(
       () => {
         async function checkStorageCredentials() {
           try {
-            const fred = await SecureStore.getItemAsync('credentials')
-            const mycredentials = JSON.parse(fred)
-            await firebase.auth().signInWithEmailAndPassword(mycredentials.email,mycredentials.password)
+            const storedCredentials = await SecureStore.getItemAsync('credentials')
+            if (storedCredentials) {
+              const mycredentials = JSON.parse(storedCredentials)
+              await firebase.auth().signInWithEmailAndPassword(mycredentials.email,mycredentials.password)
+            }
           } catch (error) {
               console.log(error)
           }
@@ -31,6 +34,9 @@ export default function App() {
   )
 
   return (
-    <AuthNavigation/>
+    <>
+      <StatusBar barStyle = 'light-content' hidden ={false} backgroundColor = '#1e5f6b' translucent ={true}/>
+      <AuthNavigation/>
+    </>
   )
 }

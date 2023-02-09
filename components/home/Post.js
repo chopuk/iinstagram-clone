@@ -71,7 +71,7 @@ const PostHeader = ({post}) => (
 const PostImage = ({post}) => (
   <View style={{ width: '100%', height: 450 }}>
     <Image 
-      source={{ uri: ENVIRONMENT.URL_PREFIX + 'uploads/' + post.imageName}}
+      source={{ uri: post.imageURL}}
       style={{height:'100%', resizeMode:'cover'}}
     />
   </View>
