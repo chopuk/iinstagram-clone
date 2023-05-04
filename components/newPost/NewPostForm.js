@@ -135,7 +135,7 @@ const NewPostForm = ({navigation}) => {
 
     const response = await fetch(uri)
     const blob = await response.blob()
-
+    
     try {
         await firebase.storage().ref().child('instagram/' + filename).put(blob)
     } catch (error) {

@@ -1,9 +1,10 @@
 import * as SplashScreen from 'expo-splash-screen'
-import AuthNavigation from './AuthNavigation'
+
 import * as SecureStore from 'expo-secure-store'
 import { useEffect } from 'react'
 import { firebase } from './firebase'
 import { StatusBar } from 'react-native'
+import AuthNavigation from './AuthNavigation'
 
 // keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync()
